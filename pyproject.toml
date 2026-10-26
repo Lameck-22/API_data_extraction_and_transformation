@@ -1,0 +1,20 @@
+[project]
+name = "api-data-extraction-transformation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Lameck-22", email = "oluochlamecko@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.1.0",
+    "requests>=2.34.2",
+]
+
+[project.scripts]
+api-data-extraction-transformation = "api_data_extraction_transformation:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
