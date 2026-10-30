@@ -30,38 +30,29 @@ def fetch_users(url: str = API_URL, timeout: float = 10.0) -> list[dict]:
         # Check for the non-200 status codes
         if response.status_code != 200:
             print(f"Error: API returned a non-200 status code: {response.status_code}")
-            sys.exit(1)
+            sys.exit(1) 
 
         # Parse JSON data
-        try:
+        else:
             return response.json()
-        except requests.exceptions.JSONDecodeError:
-            print("Error: Not a valid JSON response.")
-            sys.exit(1)
-
-    # Report clear error for timeouts
-    except requests.exceptions.Timeout:
-        print(f"Error: The request timed out after {timeout} seconds.")
+        
+    except requests.exceptions.JSONDecodeError:
+        print("Error: Not a valid JSON response.")
         sys.exit(1)
 
-    # Report clear error for connection failures
-    except requests.exceptions.ConnectionError:
-        print("Error: Failed to connect to the API. Check your internet or URL")
+    # Reporting clear error for timeouts
+    except requests.exceptions.Timeout:
+        print(f"Error: The request timed out after {timeout} seconds.")
         sys.exit(1)
 
 
 def describe_structure(payload) -> None:
     """Print what Python types, the payload and one record are made of
     (the top-level container, a record, and each nested value)."""
-    print("----------Data Structure Description-------------")
+    print("----------Data Structure-------------")
     print(f"Payload type: {type(payload).__name__}")
 
-    # Ensure payload is a list
-    if not payload or not isinstance(payload, list):
-        print("Payload is empty or not a list.")
-        return 
-
-    # Check record types
+    # Checking record types
     record = payload[0]
     print(f"Record type: {type(record).__name__}")
     print("Nested fields in a record:")
@@ -91,9 +82,9 @@ def extract_core_fields(users: list[dict]) -> list[dict]:
 
         # Append user details to empty list
         extracted.append({
-            "id": user.get("id"),
-            "name": user.get("name"),
-            "email": user.get("email"),
+            "id": user['id'],
+            "name": user['name'],
+            "email": user['email'],
             "city": city,
             "company": company
         })
@@ -145,15 +136,6 @@ def to_dataframe(flat_users: list[dict]) -> pd.DataFrame:
     """Build a DataFrame with the columns in the expected-output order."""
     df = pd.DataFrame(flat_users)
     
-    # Rename id to customer_id
-    if "id" in df.columns:
-        df = df.rename(columns={"id": "customer_id"})
-        
-    # Convert coordinates to floats
-    if "address_geo_lat" in df.columns:
-        df["address_geo_lat"] = pd.to_numeric(df["address_geo_lat"], errors="coerce")
-    if "address_geo_lng" in df.columns:
-        df["address_geo_lng"] = pd.to_numeric(df["address_geo_lng"], errors="coerce")
         
     # List column order based on expected output
     expected_cols = [
@@ -179,7 +161,7 @@ def export_csv(df: pd.DataFrame, path: Path = OUTPUT_PATH) -> Path:
 def main() -> None:
     # TODO: wire the steps together and print a short run summary.
     # Show starter script
-    print("Starting API data extraction...")
+    print("Extracting API data...")
 
     #Fetch data from API
     print(f"Fetching data from {API_URL}...")
