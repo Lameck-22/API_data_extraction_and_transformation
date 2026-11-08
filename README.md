@@ -1,48 +1,33 @@
 ## Overview
-Duka Connect, a Nairobi-based B2B distributor, is onboarding a partner whose customer directory is only available through a REST API.
-The analytics team wants that directory as a flat, tidy CSV they can join against their own sales data.
-You are the data engineer on the job. The API returns nested JSON (addresses inside users, coordinates inside addresses, companies alongside).
-Your script must fetch it reliably, understand its shape, pull out the fields that matter, flatten everything else, and export a CSV
-that a spreadsheet user could open without surprises.
-The partner's API is not always up, so the script has to fail politely rather than crash with a stack trace.
+This repository contains a Python-based data engineering pipeline designed to fetch nested JSON data from a REST API, flatten the data structures, and transform it into a clean, flat CSV file using Pandas. The project is modeled around Duka Connect, a Nairobi-based B2B distributor onboarding a partner's customer directory
 
-__Deliverables__
-- Retrieve JSON data from a REST API with the requests library and check the response before trusting it
-- Identify the Python data structures (lists, dicts, nested dicts) a JSON payload becomes
-- Use loops and comprehensions to build lists, tuples and dictionaries from raw records
-- Flatten nested JSON into single-level records with a reusable function
-- Load records into a pandas DataFrame and export a clean CSV
-- Handle network and HTTP failures without crashing
 
-### Steps and Guidelines used
-*1. Retrieve the users with requests.get()*
+Key Features & Deliverables
 
-Implemented `fetch_users(url, timeout)` so it calls the users endpoint with `requests.get()`, passes a timeout, and returns the parsed JSON. Confirm the status code before using the body.
+The script implements a robust data extraction and transformation workflow, including:
+• API Extraction: Fetches data reliably using the requests library with built-in error handling for timeouts, invalid URLs, and bad status codes.
+• JSON Flattening: Employs a dynamic, reusable flattening function (flatten_user) that handles multi-layered, nested JSON objects (like coordinates inside addresses) without hardcoding field names.
+• Data Transformation: Utilizes Python loops, list/dictionary comprehensions, and pandas DataFrames to clean data types, rename columns (e.g., id to customer_id), and format data.
+• Clean Export: Automatically creates an output/ directory and writes a flat customers_clean.csv ready for spreadsheet analysis
 
-*2. Identify the returned data structures*
+### Project Setup Instructions
+1. Clone this repository
+To clone this repository, run:
+```
+git clone https://github.com/Lameck-22/API_data_extraction_and_transformation.git
+cd API_data_extraction_and_transformation
+```
 
-Implemented `describe_structure(payload)` to print the type of the top-level payload, of one record, and of every nested value in that record. Record in your README which fields are nested and how deep they go.
 
-*3. Extract names, emails, cities and companies*
+Environment Setup
 
-Implemented `extract_core_fields(users)` returning one small dict per user with id, name, email, city and company. A missing nested key must not crash the function — decide on a sensible default and document it.
+The project uses uv or standard pip for dependency setup. If you are using standard pip, you can set it up by running:
+```
+# Create a virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
 
-*4. Build lists, tuples and dicts with loops and comprehensions*
+# Install required dependencies (pandas, requests, etc.)
+pip install -r requirements.txt
+```
 
-Implemented `build_structures(users)` returning a list of names, a list of (id, email) tuples, and a dict mapping id to city. Use at least one list comprehension, one dict comprehension and one plain for loop somewhere in the solution.
-
-*5. Flatten the nested JSON*
-
-Implemented `flatten_user(user, parent_key, sep)` so any depth of nesting becomes underscore-joined keys (for example address_geo_lat). It must work for records it has never seen, not just these ten — do not hard-code field names.
-
-*6. Load the records into a DataFrame*
-
-Implemented `to_dataframe(flat_users)` producing columns in the order shown in the expected-output resource, with id renamed to customer_id and coordinates converted to numbers. Print the DataFrame's shape and dtypes.
-
-*7. Export the cleaned CSV*
-
-Implemented `export_csv(df, path)` to write output/customers_clean.csv without the pandas index, creating the folder if it does not exist. Re-running the script must overwrite, not append.
-
-*8. Handle API request failures*
-
-Made the script survive a wrong URL, a timeout, a non-200 response and a body that is not JSON: each should produce one clear message and a non-zero exit, never a raw traceback. Show in your README how you tested each case.
